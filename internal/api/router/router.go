@@ -23,7 +23,6 @@ func SetupRouter() *gin.Engine {
 	{
 		userGroup.POST("", userHandler.CreateUser) // POST /users
 		userGroup.GET("/:id", userHandler.GetUser) // GET /users/:id
-		userGroup.GET("/hello", handler.Hello)
 	}
 
 	return r

@@ -53,13 +53,7 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 	// c.JSON(http.StatusOK, user)
 	// 定义 GET 路由
 	c.JSON(200, gin.H{
-		"message": "Hello, 111!",
+		"message": "Hello, 您已进入users Api!",
 	})
 }
 
-//Hello
-func Hello(c *gin.Context) {
-	c.JSON(200, gin.H{
-		"message": "Hello,api-user-Hello!",
-	})
-}
