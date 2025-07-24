@@ -3,7 +3,6 @@ package handler
 import (
 	"fun-service/internal/service"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -42,16 +41,16 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 
 // GetUser 处理查询用户请求
 func (h *UserHandler) GetUser(c *gin.Context) {
-	idStr := c.Param("id")
-	id, _ := strconv.ParseUint(idStr, 10, 32)
+	// idStr := c.Param("id")
+	// id, _ := strconv.ParseUint(idStr, 10, 32)
 
-	user, err := h.service.GetUserByID(uint(id))
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "用户不存在"})
-		return
-	}
+	// user, err := h.service.GetUserByID(uint(id))
+	// if err != nil {
+	// 	c.JSON(http.StatusNotFound, gin.H{"error": "用户不存在"})
+	// 	return
+	// }
 
-	c.JSON(http.StatusOK, user)
+	// c.JSON(http.StatusOK, user)
 	// 定义 GET 路由
 	c.JSON(200, gin.H{
 		"message": "Hello, 您已进入users Api!",

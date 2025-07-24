@@ -20,6 +20,5 @@ func InitMySQL(cfg config.MySQLConfig) {
 	sqlDB, _ := db.DB()
 	sqlDB.SetMaxOpenConns(cfg.MaxOpenConns)
 	sqlDB.SetMaxIdleConns(cfg.MaxIdleConns)
-
 	DB = db
 }
