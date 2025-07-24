@@ -41,7 +41,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 
 // GetUser 处理查询用户请求
 func (h *UserHandler) GetUser(c *gin.Context) {
-	// idStr := c.Param("id")
+	idStr := c.Param("id")
 	// id, _ := strconv.ParseUint(idStr, 10, 32)
 
 	// user, err := h.service.GetUserByID(uint(id))
@@ -53,7 +53,7 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 	// c.JSON(http.StatusOK, user)
 	// 定义 GET 路由
 	c.JSON(200, gin.H{
-		"message": "Hello, 您已进入users Api!",
+		"message": "Hello, 您已进入getusers Ap1i!",
+		"id":      idStr,
 	})
 }
-
