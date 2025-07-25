@@ -2,6 +2,7 @@ package database
 
 import (
 	"fun-service/config"
+	"fun-service/internal/model"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -20,5 +21,9 @@ func InitMySQL(cfg config.MySQLConfig) {
 	sqlDB, _ := db.DB()
 	sqlDB.SetMaxOpenConns(cfg.MaxOpenConns)
 	sqlDB.SetMaxIdleConns(cfg.MaxIdleConns)
+
+	// 自动迁移：根据User结构体创建或更新表结构
+	db.AutoMigrate(&model.User{})
+
 	DB = db
 }

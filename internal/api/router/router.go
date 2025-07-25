@@ -18,11 +18,10 @@ func SetupRouter() *gin.Engine {
 	// 注意：默认是阻塞式的，会一直运行直到被中断
 
 	// 用户路由
-	userHandler := handler.NewUserHandler()
-	userGroup := r.Group("/users")
+	userGroup := r.Group("/user")
 	{
-		userGroup.POST("", userHandler.CreateUser) // POST /users
-		userGroup.GET("/:id", userHandler.GetUser) // GET /users/:id
+		userGroup.POST("/register", handler.UserRegister) // POST /user/register
+		// userGroup.GET("/:id", handler.GetUser) // GET /user/:id
 	}
 
 	return r

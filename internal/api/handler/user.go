@@ -1,59 +1,66 @@
 package handler
 
 import (
-	"fun-service/internal/service"
+	"fmt"
+	"fun-service/internal/model"
+	"fun-service/pkg/database"
+	"fun-service/pkg/utils"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-// UserHandler 请求处理器
-type UserHandler struct {
-	service *service.UserService
+// user
+type UserReq struct {
+	Username string `json:"username" binding:"required"`
+	Age      int    `json:"age" binding:"required"`
+	Phone    string `json:"phone" binding:"required"`
+	Email    string `json:"email"`
+	Password string `json:"password" binding:"required"`
+	Nickname string `json:"nickname"`
 }
 
-func NewUserHandler() *UserHandler {
-	return &UserHandler{
-		service: service.NewUserService(),
-	}
-}
-
-// CreateUser 处理创建用户请求
-func (h *UserHandler) CreateUser(c *gin.Context) {
-	var req struct {
-		Username string `json:"username" binding:"required"`
-		Age      int    `json:"age" binding:"gt=0"`
-	}
-
+// 用户注册
+func UserRegister(c *gin.Context) {
+	var req UserReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": "参数错误", "error": err.Error()})
 		return
 	}
-
-	user, err := h.service.CreateUser(req.Username, req.Age)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "创建用户失败"})
-		return
+	fmt.Println("Received registration request:", req)
+	//初始化默认值
+	if req.Nickname == "" {
+		req.Nickname = utils.GenerateRandomNickname()
 	}
 
-	c.JSON(http.StatusOK, user)
-}
+	newUser := model.User{
+		Username: req.Username,
+		Age:      req.Age,
+		Phone:    req.Phone,
+		Email:    req.Email,
+		Password: req.Password,
+		Nickname: req.Nickname,
+	}
 
-// GetUser 处理查询用户请求
-func (h *UserHandler) GetUser(c *gin.Context) {
-	idStr := c.Param("id")
-	// id, _ := strconv.ParseUint(idStr, 10, 32)
-
-	// user, err := h.service.GetUserByID(uint(id))
-	// if err != nil {
-	// 	c.JSON(http.StatusNotFound, gin.H{"error": "用户不存在"})
-	// 	return
-	// }
-
-	// c.JSON(http.StatusOK, user)
-	// 定义 GET 路由
-	c.JSON(200, gin.H{
-		"message": "Hello, 您已进入getusers Ap1i!",
-		"id":      idStr,
+	var tempUser model.User
+	if err := database.DB.Where("phone = ?", req.Phone).First(&tempUser).Error; err == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": "手机号已注册"})
+		return
+	}
+	if err := database.DB.Where("username = ?", req.Username).First(&tempUser).Error; err == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": "用户名已存在"})
+		return
+	}
+	if err := database.DB.Create(&newUser).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    500,
+			"message": "注册失败，请稍后重试",
+			"error":   err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"msg":  "注册成功",
 	})
 }
