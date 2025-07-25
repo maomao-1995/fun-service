@@ -6,18 +6,19 @@ import (
 	"fun-service/pkg/database"
 	"fun-service/pkg/utils"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 // user
 type UserReq struct {
-	Username string `json:"username" binding:"required"`
-	Age      int    `json:"age" binding:"required"`
-	Phone    string `json:"phone" binding:"required"`
-	Email    string `json:"email"`
-	Password string `json:"password" binding:"required"`
-	Nickname string `json:"nickname"`
+	Username  string    `json:"username" binding:"required"`
+	Birthdate string    `json:"birthdate"`
+	Phone     string    `json:"phone" binding:"required"`
+	Email     string    `json:"email"`
+	Password  string    `json:"password" binding:"required"`
+	Nickname  string    `json:"nickname"`
 }
 
 // 用户注册
@@ -28,18 +29,24 @@ func UserRegister(c *gin.Context) {
 		return
 	}
 	fmt.Println("Received registration request:", req)
-	//初始化默认值
+	//初始化参数
 	if req.Nickname == "" {
 		req.Nickname = utils.GenerateRandomNickname()
 	}
+	birthdate, err := time.Parse("2006-01-02", req.Birthdate)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "出生日期格式错误，请使用YYYY-MM-DD"})
+		return
+	}
 
+	//创建model
 	newUser := model.User{
-		Username: req.Username,
-		Age:      req.Age,
-		Phone:    req.Phone,
-		Email:    req.Email,
-		Password: req.Password,
-		Nickname: req.Nickname,
+		Username:  req.Username,
+		Birthdate: birthdate,
+		Phone:     req.Phone,
+		Email:     req.Email,
+		Password:  req.Password,
+		Nickname:  req.Nickname,
 	}
 
 	var tempUser model.User
