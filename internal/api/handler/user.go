@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"time"
 
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -33,11 +35,24 @@ func UserRegister(c *gin.Context) {
 	if req.Nickname == "" {
 		req.Nickname = utils.GenerateRandomNickname()
 	}
+
 	birthdate, err := time.Parse("2006-01-02", req.Birthdate)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "出生日期格式错误，请使用YYYY-MM-DD"})
 		return
 	}
+
+	// 加密密码
+	hashedPassword, err := bcrypt.GenerateFromPassword(
+		[]byte(req.Password), 
+		bcrypt.DefaultCost, // 默认成本系数10，范围4-31
+	)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "密码加密失败"})
+		return
+	}
+	hashedPasswordString:=string(hashedPassword)
+
 
 	//创建model
 	newUser := model.User{
@@ -45,7 +60,7 @@ func UserRegister(c *gin.Context) {
 		Birthdate: birthdate,
 		Phone:     req.Phone,
 		Email:     req.Email,
-		Password:  req.Password,
+		Password:  hashedPasswordString,
 		Nickname:  req.Nickname,
 	}
 
