@@ -6,18 +6,20 @@ import (
 	"fun-service/internal/api/router"
 	"fun-service/pkg/database"
 	"fun-service/pkg/logger"
+	"fun-service/pkg/redis"
 )
 
 func main() {
 	// 1. 加载配置
-	cfg, err := config.Load()
-	if err != nil {
-		panic("加载配置失败: " + err.Error())
+	cfg, cfgErr := config.Load()
+	if cfgErr != nil {
+		panic("加载配置失败: " + cfgErr.Error())
+	}else{
+		fmt.Println("配置加载成功")
 	}
-	fmt.Println("配置加载成功")
 
 	// 2. 初始化日志
-	logCfg := logger.Config{
+	logCfg := logger.Config{	
 		Level: cfg.Log.Level,
 		Path:  cfg.Log.Path,
 		// 添加其他字段映射（如果有的话）
@@ -27,15 +29,19 @@ func main() {
 
 	// 3. 初始化数据库
 	database.InitMySQL(cfg.MySQL)
-	fmt.Println("数据库连接成功")
 
-	// 4. 注册路由
-	r := router.SetupRouter()
-	fmt.Println("路由注册成功")
-
-	// 5. 启动服务
-	logger.Info("服务启动: " + cfg.Server.Addr)
-	if err := r.Run(cfg.Server.Addr); err != nil {
-		logger.Fatal("服务启动失败: " + err.Error())
+	//4.连接redis
+	redisErr := redis.InitRedis()
+	if redisErr != nil {
+		panic("Redis连接失败: " + redisErr.Error())
+	}else{
+		fmt.Println("Redis连接成功")
 	}
+	
+	// 5. 启动服务
+	routerInstance := router.SetupRouter()
+	serverErr := routerInstance.Run(cfg.Server.Addr)
+	if serverErr != nil {
+		panic("启动服务失败: " + serverErr.Error())
+	}	
 }

@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"fun-service/config"
 	"fun-service/internal/model"
 
@@ -16,6 +17,7 @@ func InitMySQL(cfg config.MySQLConfig) {
 	if err != nil {
 		panic("数据库连接失败: " + err.Error())
 	}
+	fmt.Println("数据库连接成功")
 
 	// 设置连接池
 	sqlDB, _ := db.DB()
