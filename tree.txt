@@ -1,9 +1,6 @@
-#### fun-service
-```
-go v1.24.5
-```
-#### é¡¹ç›®ç›®å½•
-```
+¾í ÏµÍ³ µÄÎÄ¼ş¼Ğ PATH ÁĞ±í
+¾íĞòÁĞºÅÎª F883-6846
+C:.
 |   .air.toml
 |   .gitignore
 |   go.mod
@@ -11,58 +8,47 @@ go v1.24.5
 |   main.go
 |   README.md
 |   tree.txt
-|
+|   
 +---config
 |       app.yaml
 |       config.go
-|
+|       
 +---docs
 |       docs.go
 |       swagger.json
 |       swagger.yaml
-|
+|       
 +---internal
 |   +---handler
 |   |       user.go
-|   |
+|   |       
 |   +---middleware
 |   |       logger.go
-|   |
+|   |       
 |   +---model
 |   |       user.go
-|   |
+|   |       
 |   \---router
 |           router.go
-|
+|           
 +---pkg
 |   +---database
 |   |       mysql.go
-|   |
+|   |       
 |   +---logger
 |   |       logger.go
-|   |
+|   |       
 |   +---redis
 |   |       redis.go
-|   |
+|   |       
 |   \---utils
 |           utils.go
-|
-+---
-```
-#### æŒ‡ä»¤
-```
-å®‰è£…ä¾èµ–
-go tidy
-```
-```
-çƒ­å¯åŠ¨é¡¹ç›®
-air 
-```
-```
-ç”Ÿæˆswaggeræ–‡æ¡£
-swag init
-```
-```
-æ ¼å¼åŒ–æ–‡æ¡£
-go fmt ./...
-```
+|           
++---storage
+|   \---logs
+|           app.log
+|           
+\---tmp
+        build-errors.log
+        main.exe
+        

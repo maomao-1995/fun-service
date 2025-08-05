@@ -22,6 +22,7 @@ type UserReq struct {
 	Nickname  string `json:"nickname"`
 	Code      string `json:"code" binding:"required"` // 验证码
 }
+
 // register godoc
 // @Summary 用户注册
 // @Description 用户注册
@@ -111,6 +112,7 @@ func UserRegister(c *gin.Context) {
 type SendCodeReq struct {
 	Phone string `json:"phone" binding:"required"`
 }
+
 // SendCode godoc
 // @Summary 发送注册手机验证码
 // @Description 发送注册手机验证码
