@@ -14,12 +14,12 @@ func main() {
 	cfg, cfgErr := config.Load()
 	if cfgErr != nil {
 		panic("加载配置失败: " + cfgErr.Error())
-	}else{
+	} else {
 		fmt.Println("配置加载成功")
 	}
 
 	// 2. 初始化日志
-	logCfg := logger.Config{	
+	logCfg := logger.Config{
 		Level: cfg.Log.Level,
 		Path:  cfg.Log.Path,
 		// 添加其他字段映射（如果有的话）
@@ -34,14 +34,14 @@ func main() {
 	redisErr := redis.InitRedis()
 	if redisErr != nil {
 		panic("Redis连接失败: " + redisErr.Error())
-	}else{
+	} else {
 		fmt.Println("Redis连接成功")
 	}
-	
+
 	// 5. 启动服务
 	routerInstance := router.SetupRouter()
 	serverErr := routerInstance.Run(cfg.Server.Addr)
 	if serverErr != nil {
 		panic("启动服务失败: " + serverErr.Error())
-	}	
+	}
 }

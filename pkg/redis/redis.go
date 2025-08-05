@@ -32,5 +32,3 @@ func InitRedis() error {
 	_, err := Rdb.Ping(Ctx).Result()
 	return err
 }
-
-
