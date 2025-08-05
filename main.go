@@ -3,11 +3,18 @@ package main
 import (
 	"fmt"
 	"fun-service/config"
-	"fun-service/internal/api/router"
+	_ "fun-service/docs"
+	_ "fun-service/internal/handler"
+	"fun-service/internal/router"
 	"fun-service/pkg/database"
 	"fun-service/pkg/logger"
 	"fun-service/pkg/redis"
 )
+
+// @title Fun Service API
+// @version 1.0
+// @host localhost:8800
+// @BasePath
 
 func main() {
 	// 1. 加载配置

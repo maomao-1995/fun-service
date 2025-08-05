@@ -13,7 +13,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// 用户注册
 type UserReq struct {
 	Username  string `json:"username" binding:"required"`
 	Birthdate string `json:"birthdate"`
@@ -23,7 +22,16 @@ type UserReq struct {
 	Nickname  string `json:"nickname"`
 	Code      string `json:"code" binding:"required"` // 验证码
 }
-
+// register godoc
+// @Summary 用户注册
+// @Description 用户注册
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param user body UserReq true "用户信息"
+// @Success 200 {object} map[string]interface{} "{"code":200,"msg":"注册成功"}"
+// @Failure 400 {object} map[string]interface{} "{"code":400,"msg":"xxxx"}"
+// @Router /user/register [post]
 func UserRegister(c *gin.Context) {
 	var req UserReq
 
@@ -100,11 +108,19 @@ func UserRegister(c *gin.Context) {
 	})
 }
 
-// 发送验证码
 type SendCodeReq struct {
 	Phone string `json:"phone" binding:"required"`
 }
-
+// SendCode godoc
+// @Summary 发送注册手机验证码
+// @Description 发送注册手机验证码
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param user body SendCodeReq true "手机号"
+// @Success 200 {object} map[string]interface{} "{"code":200,"msg":"验证码发送成功"}"
+// @Failure 400 {object} map[string]interface{} "{"code":400,"msg":"参数错误"}"
+// @Router /user/sendCode [post]
 func SendCode(c *gin.Context) {
 	var req SendCodeReq
 
