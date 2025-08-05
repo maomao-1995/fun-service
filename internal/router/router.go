@@ -24,8 +24,9 @@ func SetupRouter() *gin.Engine {
 	// 用户路由
 	userGroup := r.Group("/user")
 	{
-		userGroup.POST("/register", handler.UserRegister) // POST /user/register
-		userGroup.POST("/sendCode", handler.SendCode)     // POST /user/sendCode
+		userGroup.POST("/register", handler.UserRegister)
+		userGroup.POST("/sendCode", handler.SendCode)
+		userGroup.POST("/login", handler.UserLogin)
 	}
 	return r
 }

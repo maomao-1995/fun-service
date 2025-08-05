@@ -1,4 +1,17 @@
 definitions:
+  handler.LoginReq:
+    properties:
+      code:
+        type: string
+      password:
+        description: 密码
+        type: string
+      phone:
+        type: string
+      username:
+        description: 用户名
+        type: string
+    type: object
   handler.SendCodeReq:
     properties:
       phone:
@@ -35,6 +48,34 @@ info:
   title: Fun Service API
   version: "1.0"
 paths:
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      description: 用户登录
+      parameters:
+      - description: 登录信息
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/handler.LoginReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":200,"msg":"登录成功"}'
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: '{"code":400,"msg":"xxxxx"}'
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 用户登录
+      tags:
+      - users
   /user/register:
     post:
       consumes:

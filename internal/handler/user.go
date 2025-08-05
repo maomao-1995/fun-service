@@ -3,6 +3,8 @@ package handler
 import (
 	"fun-service/internal/model"
 	"fun-service/pkg/database"
+
+	"fun-service/pkg/jwtMain"
 	"fun-service/pkg/redis"
 	"fun-service/pkg/utils"
 	"net/http"
@@ -13,7 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type UserReq struct {
+type UserParams struct {
 	Username  string `json:"username" binding:"required"`
 	Birthdate string `json:"birthdate"`
 	Phone     string `json:"phone" binding:"required"`
@@ -23,7 +25,6 @@ type UserReq struct {
 	Code      string `json:"code" binding:"required"` // 验证码
 }
 
-// register godoc
 // @Summary 用户注册
 // @Description 用户注册
 // @Tags users
@@ -34,28 +35,27 @@ type UserReq struct {
 // @Failure 400 {object} map[string]interface{} "{"code":400,"msg":"xxxx"}"
 // @Router /user/register [post]
 func UserRegister(c *gin.Context) {
-	var req UserReq
+	var params UserParams
 
-	jsonErr := c.ShouldBindJSON(&req)
+	jsonErr := c.ShouldBindJSON(&params)
 	if jsonErr != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": "参数错误", "error": jsonErr.Error()})
 		return
 	}
-
 	//初始化参数
 	//Nickname
-	if req.Nickname == "" {
-		req.Nickname = utils.GenerateRandomNickname()
+	if params.Nickname == "" {
+		params.Nickname = utils.GenerateRandomNickname()
 	}
 	//Birthdate
-	birthdate, err := time.Parse("2006-01-02", req.Birthdate)
+	birthdate, err := time.Parse("2006-01-02", params.Birthdate)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "error": "出生日期格式错误，请使用YYYY-MM-DD"})
 		return
 	}
 	//Password
 	hashedPassword, err := bcrypt.GenerateFromPassword(
-		[]byte(req.Password),
+		[]byte(params.Password),
 		bcrypt.DefaultCost, // 默认成本系数10，范围4-31
 	)
 	if err != nil {
@@ -64,12 +64,12 @@ func UserRegister(c *gin.Context) {
 	}
 	hashedPasswordString := string(hashedPassword)
 
-	code, getCodeErr := redis.Rdb.Get(redis.Ctx, req.Phone).Result()
+	code, getCodeErr := redis.Rdb.Get(redis.Ctx, params.Phone).Result()
 	if getCodeErr != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": "请先发送验证码", "error": getCodeErr.Error()})
 		return
 	}
-	codeTrue := code != req.Code
+	codeTrue := code != params.Code
 	if codeTrue {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": "验证码错误"})
 		return
@@ -77,21 +77,21 @@ func UserRegister(c *gin.Context) {
 
 	//创建model实例
 	newUser := model.User{
-		Username:  req.Username,
+		Username:  params.Username,
 		Birthdate: birthdate,
-		Phone:     req.Phone,
-		Email:     req.Email,
+		Phone:     params.Phone,
+		Email:     params.Email,
 		Password:  hashedPasswordString,
-		Nickname:  req.Nickname,
+		Nickname:  params.Nickname,
 	}
 
-	selectErr01 := database.DB.Where("phone = ?", req.Phone).First(&newUser).Error
+	selectErr01 := database.DB.Where("phone = ?", params.Phone).First(&newUser).Error
 	if selectErr01 == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": "手机号已注册"})
 		return
 	}
 
-	selectErr02 := database.DB.Where("username = ?", req.Username).First(&newUser).Error
+	selectErr02 := database.DB.Where("username = ?", params.Username).First(&newUser).Error
 	if selectErr02 == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": "用户名已存在"})
 		return
@@ -109,11 +109,10 @@ func UserRegister(c *gin.Context) {
 	})
 }
 
-type SendCodeReq struct {
+type SendCodeParams struct {
 	Phone string `json:"phone" binding:"required"`
 }
 
-// SendCode godoc
 // @Summary 发送注册手机验证码
 // @Description 发送注册手机验证码
 // @Tags users
@@ -124,9 +123,9 @@ type SendCodeReq struct {
 // @Failure 400 {object} map[string]interface{} "{"code":400,"msg":"参数错误"}"
 // @Router /user/sendCode [post]
 func SendCode(c *gin.Context) {
-	var req SendCodeReq
+	var params SendCodeParams
 
-	jsonErr := c.ShouldBindJSON(&req)
+	jsonErr := c.ShouldBindJSON(&params)
 	if jsonErr != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "error": jsonErr.Error(), "msg": "参数错误"})
 		return
@@ -134,25 +133,84 @@ func SendCode(c *gin.Context) {
 
 	//创建model实例
 	newUser := model.User{
-		Phone: req.Phone,
+		Phone: params.Phone,
 	}
-	selectErr := database.DB.Where("phone = ?", req.Phone).First(&newUser).Error
+	selectErr := database.DB.Where("phone = ?", params.Phone).First(&newUser).Error
 	if selectErr == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": "手机号已注册"})
 		return
 	}
 
-	_, getErr := redis.Rdb.Get(redis.Ctx, req.Phone).Result()
+	_, getErr := redis.Rdb.Get(redis.Ctx, params.Phone).Result()
 	if getErr == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": "验证码未过期，请稍后再试"})
 		return
 	}
 
-	setErr := redis.Rdb.Set(redis.Ctx, req.Phone, "123", 1*time.Minute).Err()
+	setErr := redis.Rdb.Set(redis.Ctx, params.Phone, "123", 1*time.Minute).Err()
 	if setErr != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": "设置验证码失败", "error": setErr.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"code": 200, "msg": "验证码发送成功"})
+}
+
+type LoginParams struct {
+	Phone    string `json:"phone" binding:""`
+	Code     string `json:"code" binding:""`
+	Username string `json:"username" binding:""`     // 用户名
+	Password string `json:"password" binding:""`     // 密码
+	Type     string `json:"type" binding:"required"` // 登录类型，phone 或 username
+}
+
+// @Summary 用户登录
+// @Description 用户登录
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param user body LoginReq true "登录信息"
+// @Success 200 {object} map[string]interface{} "{"code":200,"msg":"登录成功"}"
+// @Failure 400 {object} map[string]interface{} "{"code":400,"msg":"xxxxx",token:"xxxx"}"
+// @Router /user/login [post]
+func UserLogin(c *gin.Context) {
+	var params LoginParams
+
+	jsonErr := c.ShouldBindJSON(&params)
+	if jsonErr != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "error": jsonErr.Error(), "msg": "参数错误"})
+		return
+	}
+
+	var userTemp model.User
+	if params.Type == "phone" {
+		selectErr01 := database.DB.Where("phone = ?", params.Phone).First(&userTemp).Error
+		if selectErr01 != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": "用户不存在"})
+			return
+		}
+
+	}
+	if params.Type == "username" {
+		selectErr02 := database.DB.Where("username = ?", params.Username).First(&userTemp).Error
+		if selectErr02 != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": "用户不存在"})
+			return
+		}
+
+	}
+	// TODO: Replace with actual authentication logic and token generation
+	token, _ := jwtMain.GenerateToken(10086, "alice")
+	c.JSON(http.StatusOK, gin.H{"code": 200, "msg": "登录成功", "token": token,"user":userTemp})
+}
+
+func UserInfo(c *gin.Context) {
+	// auth := c.GetHeader("Authorization")
+	// claims, err := ParseToken(auth)
+	// if err != nil {
+	// 	c.JSON(401, gin.H{"msg": "非法或过期 token"})
+	// 	return
+	// }
+	// c.JSON(200, claims)
+	c.JSON(http.StatusOK, gin.H{"code": 200, "msg": "获取用户信息成功"})
 }
