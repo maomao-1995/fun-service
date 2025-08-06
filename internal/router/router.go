@@ -21,12 +21,15 @@ func SetupRouter() *gin.Engine {
 	// 启动服务，监听 8080 端口
 	// 注意：默认是阻塞式的，会一直运行直到被中断
 
+	//全局路由
+	r.POST("/register", handler.Register)
+	r.POST("/sendCode", handler.SendCode)
+	r.POST("/login", handler.Login)
 	// 用户路由
 	userGroup := r.Group("/user")
+	// auth.Use(JWTMiddleware())
 	{
-		userGroup.POST("/register", handler.UserRegister)
-		userGroup.POST("/sendCode", handler.SendCode)
-		userGroup.POST("/login", handler.UserLogin)
+		userGroup.POST("/info", handler.UserInfo)
 	}
 	return r
 }
