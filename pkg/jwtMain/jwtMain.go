@@ -8,18 +8,18 @@ import (
 
 // 自定义声明
 type MyClaims struct {
-	UserID   int64  `json:"uid"`
-	Username string `json:"uname"`
+	UserPhone int64  `json:"userPhone"`
+	Username  string `json:"username"`
 	jwt.RegisteredClaims
 }
 
 var secret = []byte("fun-256-bit-secret")
 
 // GenerateToken 签发
-func GenerateToken(uid int64, username string) (string, error) {
+func GenerateToken(userPhone int64, username string) (string, error) {
 	claims := MyClaims{
-		UserID:   uid,
-		Username: username,
+		UserPhone: userPhone,
+		Username:  username,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)), // 有效期 24h
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

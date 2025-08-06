@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"fun-service/internal/model"
 	"fun-service/pkg/database"
 	"strconv"
@@ -207,12 +208,14 @@ func Login(c *gin.Context) {
 		default:
 		}
 	}
-	
-	PhoneTemp, PhoneTempErr := strconv.ParseInt(userTemp.Phone,10,64)
+
+	PhoneTemp, PhoneTempErr := strconv.ParseInt(userTemp.Phone, 10, 64)
 	if PhoneTempErr != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": "手机号转换失败", "error": PhoneTempErr.Error()})
 		return
 	}
+	fmt.Println("PhoneTemp:", PhoneTemp)
+
 	token, _ := jwtMain.GenerateToken(PhoneTemp, userTemp.Username)
 	c.JSON(http.StatusOK, gin.H{"code": 200, "msg": "登录成功", "token": token})
 }

@@ -27,9 +27,9 @@ func SetupRouter() *gin.Engine {
 	r.POST("/login", handler.Login)
 	// 用户路由
 	userGroup := r.Group("/user")
-	// auth.Use(JWTMiddleware())
+	userGroup.Use(middleware.ParseToken())
 	{
-		userGroup.POST("/info", handler.UserInfo)
+		userGroup.GET("/info", handler.UserInfo)
 	}
 	return r
 }
