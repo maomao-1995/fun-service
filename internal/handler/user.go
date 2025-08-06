@@ -8,13 +8,25 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type UserDTO struct {
+	Username string `json:"username"`
+	Phone    int64  `json:"phone"`
+	Email    string `json:"email"`
+	Nickname string `json:"nickname"`
+	Id       int64  `json:"id"`
+}
+
 func UserInfo(c *gin.Context) {
 	username := c.MustGet("username").(string)
 	userPhone := c.MustGet("userPhone").(int64)
 
-	var userTemp model.User
-	selectErr01 := database.DB.Where("phone = ? OR username = ?", userPhone, username).First(&userTemp).Error
-	if selectErr01 != nil {
+	var userTemp UserDTO
+	err := database.DB.
+		Model(&model.User{}).
+		Select("id,username, phone,email,nickname").
+		Where("phone = ? OR username = ?", userPhone, username).
+		Scan(&userTemp).Error
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": "用户不存在"})
 		return
 	}
