@@ -16,6 +16,14 @@ type UserDTO struct {
 	Id       int64  `json:"id"`
 }
 
+// @Summary 获取用户信息
+// @Description 获取用户信息
+// @Tags user
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string]interface{} "{"code":200,"msg":"获取用户信息成功","data":UserDTO}"
+// @Failure 400 {object} map[string]interface{} "{"code":400,"msg":"xxxxx"}"
+// @Router /user/info [post]
 func UserInfo(c *gin.Context) {
 	username := c.MustGet("username").(string)
 	userPhone := c.MustGet("userPhone").(int64)

@@ -25,6 +25,7 @@ func SetupRouter() *gin.Engine {
 	r.POST("/register", handler.Register)
 	r.POST("/sendCode", handler.SendCode)
 	r.POST("/login", handler.Login)
+	r.GET("/refresh", handler.Refresh)
 	// 用户路由
 	userGroup := r.Group("/user")
 	userGroup.Use(middleware.ParseToken())

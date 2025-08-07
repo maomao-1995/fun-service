@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/user/login": {
+        "/login": {
             "post": {
                 "description": "用户登录",
                 "consumes": [
@@ -25,7 +25,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "global"
                 ],
                 "summary": "用户登录",
                 "parameters": [
@@ -35,7 +35,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.LoginReq"
+                            "$ref": "#/definitions/handler.LoginParams"
                         }
                     }
                 ],
@@ -48,7 +48,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "{\"code\":400,\"msg\":\"xxxxx\"}",
+                        "description": "{\"code\":400,\"msg\":\"xxxxx\",token:\"xxxx\"}",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -57,7 +57,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/user/register": {
+        "/register": {
             "post": {
                 "description": "用户注册",
                 "consumes": [
@@ -67,7 +67,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "global"
                 ],
                 "summary": "用户注册",
                 "parameters": [
@@ -77,7 +77,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.UserReq"
+                            "$ref": "#/definitions/handler.UserParams"
                         }
                     }
                 ],
@@ -99,7 +99,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/user/sendCode": {
+        "/sendCode": {
             "post": {
                 "description": "发送注册手机验证码",
                 "consumes": [
@@ -109,7 +109,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "global"
                 ],
                 "summary": "发送注册手机验证码",
                 "parameters": [
@@ -119,7 +119,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.SendCodeReq"
+                            "$ref": "#/definitions/handler.SendCodeParams"
                         }
                     }
                 ],
@@ -140,11 +140,45 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/user/info": {
+            "post": {
+                "description": "获取用户信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "获取用户信息",
+                "responses": {
+                    "200": {
+                        "description": "{\"code\":200,\"msg\":\"获取用户信息成功\",\"data\":UserDTO}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "{\"code\":400,\"msg\":\"xxxxx\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
-        "handler.LoginReq": {
+        "handler.LoginParams": {
             "type": "object",
+            "required": [
+                "type"
+            ],
             "properties": {
                 "code": {
                     "type": "string"
@@ -156,13 +190,17 @@ const docTemplate = `{
                 "phone": {
                     "type": "string"
                 },
+                "type": {
+                    "description": "登录类型，phone 或 username",
+                    "type": "string"
+                },
                 "username": {
                     "description": "用户名",
                     "type": "string"
                 }
             }
         },
-        "handler.SendCodeReq": {
+        "handler.SendCodeParams": {
             "type": "object",
             "required": [
                 "phone"
@@ -173,7 +211,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.UserReq": {
+        "handler.UserParams": {
             "type": "object",
             "required": [
                 "code",

@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"fun-service/pkg/jwtMain"
 	"strings"
 
@@ -16,10 +15,9 @@ func ParseToken() gin.HandlerFunc {
 			return
 		}
 		tokenStr = strings.TrimPrefix(tokenStr, "Bearer ")
-		fmt.Println("tokenStr:", tokenStr)
 		claims, claimsErr := jwtMain.ParseToken(tokenStr)
 		if claimsErr != nil {
-			c.AbortWithStatusJSON(401, gin.H{"msg": "非法或过期 token", "error": claimsErr.Error()})
+			c.AbortWithStatusJSON(401, gin.H{"code":401,"msg": "非法或过期 token", "error": claimsErr.Error()})
 			return
 		}
 		c.Set("username", claims.Username)

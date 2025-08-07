@@ -5,6 +5,7 @@ import (
 	"fun-service/internal/model"
 	"fun-service/pkg/database"
 	"strconv"
+	"strings"
 
 	"fun-service/pkg/jwtMain"
 	"fun-service/pkg/redis"
@@ -29,10 +30,10 @@ type UserParams struct {
 
 // @Summary 用户注册
 // @Description 用户注册
-// @Tags users
+// @Tags global
 // @Accept json
 // @Produce json
-// @Param user body UserReq true "用户信息"
+// @Param user body UserParams true "用户信息"
 // @Success 200 {object} map[string]interface{} "{"code":200,"msg":"注册成功"}"
 // @Failure 400 {object} map[string]interface{} "{"code":400,"msg":"xxxx"}"
 // @Router /register [post]
@@ -117,10 +118,10 @@ type SendCodeParams struct {
 
 // @Summary 发送注册手机验证码
 // @Description 发送注册手机验证码
-// @Tags users
+// @Tags global
 // @Accept json
 // @Produce json
-// @Param user body SendCodeReq true "手机号"
+// @Param user body SendCodeParams true "手机号"
 // @Success 200 {object} map[string]interface{} "{"code":200,"msg":"验证码发送成功"}"
 // @Failure 400 {object} map[string]interface{} "{"code":400,"msg":"参数错误"}"
 // @Router /sendCode [post]
@@ -165,10 +166,10 @@ type LoginParams struct {
 
 // @Summary 用户登录
 // @Description 用户登录
-// @Tags users
+// @Tags global
 // @Accept json
 // @Produce json
-// @Param user body LoginReq true "登录信息"
+// @Param user body LoginParams true "登录信息"
 // @Success 200 {object} map[string]interface{} "{"code":200,"msg":"登录成功"}"
 // @Failure 400 {object} map[string]interface{} "{"code":400,"msg":"xxxxx",token:"xxxx"}"
 // @Router /login [post]
@@ -216,6 +217,31 @@ func Login(c *gin.Context) {
 	}
 	fmt.Println("PhoneTemp:", PhoneTemp)
 
-	token, _ := jwtMain.GenerateToken(PhoneTemp, userTemp.Username)
-	c.JSON(http.StatusOK, gin.H{"code": 200, "msg": "登录成功", "token": token})
+	token, _ := jwtMain.GenerateToken(PhoneTemp, userTemp.Username, time.Now().Add(5*time.Minute))
+	c.JSON(http.StatusOK, gin.H{"code": 200, "msg": "登录成功", "data": gin.H{"token": token}})
+}
+
+
+// @Summary 刷新Token
+// @Description 刷新Token
+// @Tags global
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string]interface{} "{"code":200,"msg":"刷新成功","token":"xxxx
+func Refresh(c *gin.Context) {
+		tokenStr := c.GetHeader("refresh_token")
+		if tokenStr == "" || !strings.HasPrefix(tokenStr, "Bearer ") {
+			c.AbortWithStatusJSON(401, gin.H{"code":400,"msg": "no token"})
+			return
+		}
+		tokenStr = strings.TrimPrefix(tokenStr, "Bearer ")
+		claims, claimsErr := jwtMain.ParseToken(tokenStr)
+		if claimsErr != nil {
+			c.AbortWithStatusJSON(401, gin.H{"code":401,"msg": "非法或过期 token", "error": claimsErr.Error()})
+			return
+		}
+
+	token01, _ := jwtMain.GenerateToken(claims.UserPhone, claims.Username, time.Now().Add(5*time.Minute))
+	token02, _ := jwtMain.GenerateToken(claims.UserPhone, claims.Username, time.Now().Add(7*24*time.Minute))
+	c.JSON(http.StatusOK, gin.H{"code": 200, "msg": "刷新重置token成功", "data": gin.H{"accessToken": token01, "refreshToken": token02}})
 }

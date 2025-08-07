@@ -1,5 +1,5 @@
 definitions:
-  handler.LoginReq:
+  handler.LoginParams:
     properties:
       code:
         type: string
@@ -8,18 +8,23 @@ definitions:
         type: string
       phone:
         type: string
+      type:
+        description: 登录类型，phone 或 username
+        type: string
       username:
         description: 用户名
         type: string
+    required:
+    - type
     type: object
-  handler.SendCodeReq:
+  handler.SendCodeParams:
     properties:
       phone:
         type: string
     required:
     - phone
     type: object
-  handler.UserReq:
+  handler.UserParams:
     properties:
       birthdate:
         type: string
@@ -48,7 +53,7 @@ info:
   title: Fun Service API
   version: "1.0"
 paths:
-  /user/login:
+  /login:
     post:
       consumes:
       - application/json
@@ -59,7 +64,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/handler.LoginReq'
+          $ref: '#/definitions/handler.LoginParams'
       produces:
       - application/json
       responses:
@@ -69,14 +74,14 @@ paths:
             additionalProperties: true
             type: object
         "400":
-          description: '{"code":400,"msg":"xxxxx"}'
+          description: '{"code":400,"msg":"xxxxx",token:"xxxx"}'
           schema:
             additionalProperties: true
             type: object
       summary: 用户登录
       tags:
-      - users
-  /user/register:
+      - global
+  /register:
     post:
       consumes:
       - application/json
@@ -87,7 +92,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/handler.UserReq'
+          $ref: '#/definitions/handler.UserParams'
       produces:
       - application/json
       responses:
@@ -103,8 +108,8 @@ paths:
             type: object
       summary: 用户注册
       tags:
-      - users
-  /user/sendCode:
+      - global
+  /sendCode:
     post:
       consumes:
       - application/json
@@ -115,7 +120,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/handler.SendCodeReq'
+          $ref: '#/definitions/handler.SendCodeParams'
       produces:
       - application/json
       responses:
@@ -131,5 +136,26 @@ paths:
             type: object
       summary: 发送注册手机验证码
       tags:
-      - users
+      - global
+  /user/info:
+    post:
+      consumes:
+      - application/json
+      description: 获取用户信息
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":200,"msg":"获取用户信息成功","data":UserDTO}'
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: '{"code":400,"msg":"xxxxx"}'
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 获取用户信息
+      tags:
+      - user
 swagger: "2.0"
