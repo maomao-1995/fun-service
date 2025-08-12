@@ -11,7 +11,7 @@ func ParseToken() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenStr := c.GetHeader("Authorization")
 		if tokenStr == "" || !strings.HasPrefix(tokenStr, "Bearer ") {
-			c.AbortWithStatusJSON(401, gin.H{"msg": "no token"})
+			c.AbortWithStatusJSON(401, gin.H{"code":401,"msg": "no token"})
 			return
 		}
 		tokenStr = strings.TrimPrefix(tokenStr, "Bearer ")

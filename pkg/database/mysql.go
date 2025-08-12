@@ -26,6 +26,7 @@ func InitMySQL(cfg config.MySQLConfig) {
 
 	// 自动迁移：根据User结构体创建或更新表结构
 	db.AutoMigrate(&model.User{})
+	db.AutoMigrate(&model.Emoji{})
 
 	DB = db
 }

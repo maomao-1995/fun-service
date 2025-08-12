@@ -9,7 +9,7 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
-// 生成随机昵称：前缀 + 6位随机数字
+// 默认昵称
 func GenerateRandomNickname() string {
 	// 初始化随机数生成器
 	rand.Seed(time.Now().UnixNano())
@@ -21,8 +21,8 @@ func GenerateRandomNickname() string {
 	return fmt.Sprintf("%s_%d", "用户", randomNum)
 }
 
+// 检查哈希值是否已存在
 func CheckHash(hash string) (string, bool) {
-	// 检查哈希值是否已存在
 	filename, err := redisMain.Rdb.Get(redisMain.Ctx, hash).Result()
 	if err == redis.Nil {
 		return "", false

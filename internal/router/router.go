@@ -21,7 +21,7 @@ func SetupRouter() *gin.Engine {
 	// 注册Swagger路由
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// 启动服务，监听 8080 端口
+	// 启动服务
 	// 注意：默认是阻塞式的，会一直运行直到被中断
 
 	//全局路由

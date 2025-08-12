@@ -57,8 +57,8 @@ func Register(c *gin.Context) {
 		params.Nickname = utils.GenerateRandomNickname()
 	}
 	//Birthdate
-	birthdate, err := time.Parse("2006-01-02", params.Birthdate)
-	if err != nil {
+	birthdate, birthdateErr := time.Parse("2006-01-02", params.Birthdate)
+	if birthdateErr != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "error": "出生日期格式错误，请使用YYYY-MM-DD"})
 		return
 	}
@@ -222,7 +222,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	token, _ := jwtMain.GenerateToken(PhoneTemp, userTemp.Username, time.Now().Add(5*time.Minute))
+	token, _ := jwtMain.GenerateToken(PhoneTemp, userTemp.Username, time.Now().Add(50*time.Minute))
 	c.JSON(http.StatusOK, gin.H{"code": 200, "msg": "登录成功", "data": gin.H{"token": token}})
 }
 
