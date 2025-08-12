@@ -164,6 +164,33 @@ paths:
       summary: 发送注册手机验证码
       tags:
       - global
+  /upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 文件上传
+      parameters:
+      - description: 文件
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":200,"msg":"文件上传成功","url":"xxxx"}'
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: '{"code":400,"msg":"xxxxx"}'
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 文件上传
+      tags:
+      - global
   /user/info:
     get:
       consumes:
