@@ -1,9 +1,14 @@
 package handler
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"fun-service/internal/model"
 	"fun-service/pkg/database"
+	"io"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -16,6 +21,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type UserParams struct {
@@ -215,33 +221,104 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": "手机号转换失败", "error": PhoneTempErr.Error()})
 		return
 	}
-	fmt.Println("PhoneTemp:", PhoneTemp)
 
 	token, _ := jwtMain.GenerateToken(PhoneTemp, userTemp.Username, time.Now().Add(5*time.Minute))
 	c.JSON(http.StatusOK, gin.H{"code": 200, "msg": "登录成功", "data": gin.H{"token": token}})
 }
 
-
-// @Summary 刷新Token
-// @Description 刷新Token
+// @Summary 刷新重置token
+// @Description 刷新重置token
 // @Tags global
 // @Accept json
 // @Produce json
-// @Success 200 {object} map[string]interface{} "{"code":200,"msg":"刷新成功","token":"xxxx
+// @Param refresh_token header string true "refresh_token" // 需要在请求头中传递 refresh_token
+// @Success 200 {object} map[string]interface{} "{"code":200,"msg":"刷新重置token成功","token":"xxxx"}"
+// @Failure 400 {object} map[string]interface{} "{"code":401,"msg":"xxxxx"}"
+// @Router /refresh [get]
 func Refresh(c *gin.Context) {
-		tokenStr := c.GetHeader("refresh_token")
-		if tokenStr == "" || !strings.HasPrefix(tokenStr, "Bearer ") {
-			c.AbortWithStatusJSON(401, gin.H{"code":400,"msg": "no token"})
-			return
-		}
-		tokenStr = strings.TrimPrefix(tokenStr, "Bearer ")
-		claims, claimsErr := jwtMain.ParseToken(tokenStr)
-		if claimsErr != nil {
-			c.AbortWithStatusJSON(401, gin.H{"code":401,"msg": "非法或过期 token", "error": claimsErr.Error()})
-			return
-		}
+	tokenStr := c.GetHeader("refresh_token")
+	if tokenStr == "" || !strings.HasPrefix(tokenStr, "Bearer ") {
+		c.AbortWithStatusJSON(401, gin.H{"code": 400, "msg": "no token"})
+		return
+	}
+	tokenStr = strings.TrimPrefix(tokenStr, "Bearer ")
+	claims, claimsErr := jwtMain.ParseToken(tokenStr)
+	if claimsErr != nil {
+		c.AbortWithStatusJSON(401, gin.H{"code": 401, "msg": "非法或过期 token", "error": claimsErr.Error()})
+		return
+	}
 
 	token01, _ := jwtMain.GenerateToken(claims.UserPhone, claims.Username, time.Now().Add(5*time.Minute))
 	token02, _ := jwtMain.GenerateToken(claims.UserPhone, claims.Username, time.Now().Add(7*24*time.Minute))
 	c.JSON(http.StatusOK, gin.H{"code": 200, "msg": "刷新重置token成功", "data": gin.H{"accessToken": token01, "refreshToken": token02}})
+}
+
+// @Summary 文件上传
+// @Description 文件上传
+// @Tags global
+// @Accept multipart/form-data
+// @Produce json
+// @Param file formData file true "文件"
+// @Success 200 {object} map[string]interface{} "{"code":200,"msg":"文件上传成功","file":"xxxx"}"
+// @Failure 400 {object} map[string]interface{} "{"code":400,"msg":"xxxxx"}"
+// @Router /upload [post]
+func Upload(c *gin.Context) {
+	// 获取图片文件
+	file, header, err := c.Request.FormFile("file")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "error": "未上传文件"})
+		return
+	}
+	defer file.Close()
+
+	// 计算文件的 MD5 哈希值
+	hash := md5.New()
+	if _, err := io.Copy(hash, file); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "error": "计算文件哈希值失败"})
+		return
+	}
+	fileHash := hex.EncodeToString(hash.Sum(nil))
+
+	// 重置文件指针
+	file.Seek(0, 0)
+
+	// 检查文件是否已存在
+	if existingFileName, ok := utils.UploadedHashes[fileHash]; ok {
+		// 文件内容已存在，返回文件的访问 URL
+		c.JSON(http.StatusOK, gin.H{
+			"code":    200,
+			"message": "文件已存在，无需重复上传",
+			"url":     fmt.Sprintf("/uploads/%s", existingFileName),
+		})
+		return
+	}
+
+	// 创建文件夹
+	dirPath := "./uploads"
+	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
+		os.MkdirAll(dirPath, os.ModePerm) // 创建目录
+	}
+
+	// 生成新的文件名（加入 UUID）
+	fileExtension := filepath.Ext(header.Filename)
+	newFileName := uuid.New().String() + fileExtension
+	newFilePath := filepath.Join(dirPath, newFileName)
+
+	// 保存文件
+	if err := c.SaveUploadedFile(header, newFilePath); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "error": "保存文件失败"})
+		return
+	}
+
+	// 将文件哈希值和文件名添加到全局哈希集合中
+	utils.UploadedHashes[fileHash] = newFileName
+
+	// 保存哈希值到文件
+	utils.SaveHashes()
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    200,
+		"message": "文件上传成功",
+		"url":     fmt.Sprintf("/uploads/%s", newFileName),
+	})
 }

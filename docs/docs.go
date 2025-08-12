@@ -57,6 +57,46 @@ const docTemplate = `{
                 }
             }
         },
+        "/refresh": {
+            "get": {
+                "description": "刷新重置token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "global"
+                ],
+                "summary": "刷新重置token",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "refresh_token",
+                        "name": "refresh_token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\":200,\"msg\":\"刷新重置token成功\",\"token\":\"xxxx\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "{\"code\":401,\"msg\":\"xxxxx\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/register": {
             "post": {
                 "description": "用户注册",
@@ -142,7 +182,7 @@ const docTemplate = `{
             }
         },
         "/user/info": {
-            "post": {
+            "get": {
                 "description": "获取用户信息",
                 "consumes": [
                     "application/json"
@@ -154,6 +194,15 @@ const docTemplate = `{
                     "user"
                 ],
                 "summary": "获取用户信息",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "{\"code\":200,\"msg\":\"获取用户信息成功\",\"data\":UserDTO}",

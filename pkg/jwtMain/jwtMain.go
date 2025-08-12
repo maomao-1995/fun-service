@@ -32,7 +32,7 @@ func GenerateToken(userPhone int64, username string, expirationTime time.Time) (
 
 // ParseToken 解析并校验
 func ParseToken(tokenStr string) (*MyClaims, error) {
-	
+
 	token, err := jwt.ParseWithClaims(tokenStr, &MyClaims{}, func(t *jwt.Token) (interface{}, error) {
 		return secret, nil
 	})

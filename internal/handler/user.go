@@ -21,9 +21,10 @@ type UserDTO struct {
 // @Tags user
 // @Accept json
 // @Produce json
+// @Param Authorization header string true "Authorization"
 // @Success 200 {object} map[string]interface{} "{"code":200,"msg":"获取用户信息成功","data":UserDTO}"
 // @Failure 400 {object} map[string]interface{} "{"code":400,"msg":"xxxxx"}"
-// @Router /user/info [post]
+// @Router /user/info [get]
 func UserInfo(c *gin.Context) {
 	username := c.MustGet("username").(string)
 	userPhone := c.MustGet("userPhone").(int64)

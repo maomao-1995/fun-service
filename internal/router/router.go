@@ -12,6 +12,9 @@ import (
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
 
+	// 配置静态文件服务
+	r.Static("/uploads", "./uploads")
+
 	// 全局中间件
 	r.Use(middleware.Logger())
 
@@ -26,6 +29,7 @@ func SetupRouter() *gin.Engine {
 	r.POST("/sendCode", handler.SendCode)
 	r.POST("/login", handler.Login)
 	r.GET("/refresh", handler.Refresh)
+	r.POST("/upload", handler.Upload)
 	// 用户路由
 	userGroup := r.Group("/user")
 	userGroup.Use(middleware.ParseToken())

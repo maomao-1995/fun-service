@@ -81,6 +81,33 @@ paths:
       summary: 用户登录
       tags:
       - global
+  /refresh:
+    get:
+      consumes:
+      - application/json
+      description: 刷新重置token
+      parameters:
+      - description: refresh_token
+        in: header
+        name: refresh_token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":200,"msg":"刷新重置token成功","token":"xxxx"}'
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: '{"code":401,"msg":"xxxxx"}'
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 刷新重置token
+      tags:
+      - global
   /register:
     post:
       consumes:
@@ -138,10 +165,16 @@ paths:
       tags:
       - global
   /user/info:
-    post:
+    get:
       consumes:
       - application/json
       description: 获取用户信息
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:

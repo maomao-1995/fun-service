@@ -11,5 +11,6 @@ type User struct {
 	Email     string    `gorm:"size:100" json:"email"`
 	Password  string    `gorm:"size:100" json:"password"`
 	Nickname  string    `gorm:"size:50" json:"nickname"`
-	UpdatedAt time.Time
+	UpdatedAt time.Time `json:"updated_at"`
+	CreatedAt time.Time `json:"created_at"`
 }

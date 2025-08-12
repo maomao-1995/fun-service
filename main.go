@@ -9,6 +9,7 @@ import (
 	"fun-service/pkg/database"
 	"fun-service/pkg/logger"
 	"fun-service/pkg/redis"
+	"fun-service/pkg/utils"
 )
 
 // @title Fun Service API
@@ -17,7 +18,7 @@ import (
 // @BasePath
 
 func main() {
-	// 1. 加载配置
+	//加载配置
 	cfg, cfgErr := config.Load()
 	if cfgErr != nil {
 		panic("加载配置失败: " + cfgErr.Error())
@@ -25,7 +26,7 @@ func main() {
 		fmt.Println("配置加载成功")
 	}
 
-	// 2. 初始化日志
+	//初始化日志
 	logCfg := logger.Config{
 		Level: cfg.Log.Level,
 		Path:  cfg.Log.Path,
@@ -34,10 +35,10 @@ func main() {
 	logger.Init(logCfg)
 	fmt.Println("日志系统初始化成功")
 
-	// 3. 初始化数据库
+	//初始化数据库
 	database.InitMySQL(cfg.MySQL)
 
-	//4.连接redis
+	//连接redis
 	redisErr := redis.InitRedis()
 	if redisErr != nil {
 		panic("Redis连接失败: " + redisErr.Error())
@@ -45,7 +46,10 @@ func main() {
 		fmt.Println("Redis连接成功")
 	}
 
-	// 5. 启动服务
+	//加载已上传文件的哈希值
+	utils.LoadHashes()
+
+	// 启动服务
 	routerInstance := router.SetupRouter()
 	serverErr := routerInstance.Run(cfg.Server.Addr)
 	if serverErr != nil {

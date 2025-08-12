@@ -17,7 +17,7 @@ func ParseToken() gin.HandlerFunc {
 		tokenStr = strings.TrimPrefix(tokenStr, "Bearer ")
 		claims, claimsErr := jwtMain.ParseToken(tokenStr)
 		if claimsErr != nil {
-			c.AbortWithStatusJSON(401, gin.H{"code":401,"msg": "非法或过期 token", "error": claimsErr.Error()})
+			c.AbortWithStatusJSON(401, gin.H{"code": 401, "msg": "非法或过期 token", "error": claimsErr.Error()})
 			return
 		}
 		c.Set("username", claims.Username)
