@@ -13,7 +13,7 @@ import (
 	"strings"
 
 	"fun-service/pkg/jwtMain"
-	"fun-service/pkg/redis"
+	"fun-service/pkg/redisMain"
 	"fun-service/pkg/utils"
 	"net/http"
 	"time"
@@ -73,7 +73,7 @@ func Register(c *gin.Context) {
 	}
 	hashedPasswordString := string(hashedPassword)
 
-	code, getCodeErr := redis.Rdb.Get(redis.Ctx, params.Phone).Result()
+	code, getCodeErr := redisMain.Rdb.Get(redisMain.Ctx, params.Phone).Result()
 	if getCodeErr != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": "请先发送验证码", "error": getCodeErr.Error()})
 		return
@@ -147,13 +147,13 @@ func SendCode(c *gin.Context) {
 		return
 	}
 
-	_, getErr := redis.Rdb.Get(redis.Ctx, params.Phone).Result()
+	_, getErr := redisMain.Rdb.Get(redisMain.Ctx, params.Phone).Result()
 	if getErr == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": "验证码未过期，请稍后再试"})
 		return
 	}
 
-	setErr := redis.Rdb.Set(redis.Ctx, params.Phone, "123", 1*time.Minute).Err()
+	setErr := redisMain.Rdb.Set(redisMain.Ctx, params.Phone, "123", 1*time.Minute).Err()
 	if setErr != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": "设置验证码失败", "error": setErr.Error()})
 		return
@@ -259,7 +259,7 @@ func Refresh(c *gin.Context) {
 // @Accept multipart/form-data
 // @Produce json
 // @Param file formData file true "文件"
-// @Success 200 {object} map[string]interface{} "{"code":200,"msg":"文件上传成功","file":"xxxx"}"
+// @Success 200 {object} map[string]interface{} "{"code":200,"msg":"文件上传成功","url":"xxxx"}"
 // @Failure 400 {object} map[string]interface{} "{"code":400,"msg":"xxxxx"}"
 // @Router /upload [post]
 func Upload(c *gin.Context) {
@@ -283,7 +283,7 @@ func Upload(c *gin.Context) {
 	file.Seek(0, 0)
 
 	// 检查文件是否已存在
-	if existingFileName, ok := utils.UploadedHashes[fileHash]; ok {
+	if existingFileName, ok := utils.CheckHash(fileHash); ok {
 		// 文件内容已存在，返回文件的访问 URL
 		c.JSON(http.StatusOK, gin.H{
 			"code":    200,
@@ -310,11 +310,8 @@ func Upload(c *gin.Context) {
 		return
 	}
 
-	// 将文件哈希值和文件名添加到全局哈希集合中
-	utils.UploadedHashes[fileHash] = newFileName
-
-	// 保存哈希值到文件
-	utils.SaveHashes()
+	// 保存哈希值到 Redis
+	utils.SaveHash(fileHash,newFileName)
 
 	c.JSON(http.StatusOK, gin.H{
 		"code":    200,

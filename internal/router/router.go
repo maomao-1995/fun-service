@@ -36,5 +36,13 @@ func SetupRouter() *gin.Engine {
 	{
 		userGroup.GET("/info", handler.UserInfo)
 	}
+	//emoji路由
+	emojiGroup := r.Group("/emoji")
+	emojiGroup.Use(middleware.ParseToken())
+	{
+		emojiGroup.GET("/detail", handler.EmojiDetail)
+		emojiGroup.POST("/add", handler.EmojiAdd)
+		emojiGroup.POST("/delete", handler.EmojiDelete)
+	}
 	return r
 }

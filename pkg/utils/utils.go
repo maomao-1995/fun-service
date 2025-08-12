@@ -1,11 +1,12 @@
 package utils
 
 import (
-	"encoding/json"
 	"fmt"
+	"fun-service/pkg/redisMain"
 	"math/rand"
-	"os"
 	"time"
+
+	"github.com/go-redis/redis/v8"
 )
 
 // 生成随机昵称：前缀 + 6位随机数字
@@ -20,43 +21,22 @@ func GenerateRandomNickname() string {
 	return fmt.Sprintf("%s_%d", "用户", randomNum)
 }
 
-// 加载已上传文件的哈希值
-// 全局哈希集合，用于存储已上传文件的哈希值和文件名
-var UploadedHashes = make(map[string]string) // 哈希值映射到文件名
-const HashFilePath = "./uploads/hashes.json"
-
-func LoadHashes() {
-
-	file, err := os.Open(HashFilePath)
-	if err != nil {
-		// 如果文件不存在，创建一个空文件
-		file, err = os.Create(HashFilePath)
-		if err != nil {
-			fmt.Println("创建哈希文件失败:", err)
-			return
-		}
-		defer file.Close()
-		return
+func CheckHash(hash string) (string, bool) {
+	// 检查哈希值是否已存在
+	filename, err := redisMain.Rdb.Get(redisMain.Ctx, hash).Result()
+	if err == redis.Nil {
+		return "", false
+	} else if err != nil {
+		fmt.Println("查询哈希值失败:", err)
+		return "", false
 	}
-	defer file.Close()
-
-	decoder := json.NewDecoder(file)
-	if err := decoder.Decode(&UploadedHashes); err != nil {
-		fmt.Println("加载哈希值失败:", err)
-	}
+	return filename, true
 }
 
-// 保存哈希值到文件
-func SaveHashes() {
-	file, err := os.Create(HashFilePath)
+// 保存哈希值到 Redis
+func SaveHash(hash, filename string) {
+	err := redisMain.Rdb.Set(redisMain.Ctx, hash, filename, 0).Err()
 	if err != nil {
-		fmt.Println("保存哈希值失败:", err)
-		return
-	}
-	defer file.Close()
-
-	encoder := json.NewEncoder(file)
-	if err := encoder.Encode(UploadedHashes); err != nil {
 		fmt.Println("保存哈希值失败:", err)
 	}
 }

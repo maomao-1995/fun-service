@@ -2,7 +2,7 @@ package model
 
 import "time"
 
-type EmojiList struct {
+type EmojiGroup struct {
 	ID               uint      `gorm:"primaryKey" json:"id"`
 	Name             string    `gorm:"size:100;uniqueIndex" json:"name"`
 	EmojiIDs         []uint    `gorm:"type:json" json:"emoji_ids"` // Store emoji IDs in a JSON array

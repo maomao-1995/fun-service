@@ -8,8 +8,7 @@ import (
 	"fun-service/internal/router"
 	"fun-service/pkg/database"
 	"fun-service/pkg/logger"
-	"fun-service/pkg/redis"
-	"fun-service/pkg/utils"
+	"fun-service/pkg/redisMain"
 )
 
 // @title Fun Service API
@@ -39,15 +38,12 @@ func main() {
 	database.InitMySQL(cfg.MySQL)
 
 	//连接redis
-	redisErr := redis.InitRedis()
+	redisErr := redisMain.InitRedis()
 	if redisErr != nil {
 		panic("Redis连接失败: " + redisErr.Error())
 	} else {
 		fmt.Println("Redis连接成功")
 	}
-
-	//加载已上传文件的哈希值
-	utils.LoadHashes()
 
 	// 启动服务
 	routerInstance := router.SetupRouter()
