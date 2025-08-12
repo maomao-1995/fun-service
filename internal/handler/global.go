@@ -311,7 +311,7 @@ func Upload(c *gin.Context) {
 	}
 
 	// 保存哈希值到 Redis
-	utils.SaveHash(fileHash,newFileName)
+	utils.SaveHash(fileHash, newFileName)
 
 	c.JSON(http.StatusOK, gin.H{
 		"code":    200,

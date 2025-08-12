@@ -60,6 +60,7 @@ go tidy
 air 
 ```
 生成swagger文档
+访问 http://localhost:8800/swagger/index.html
 ```
 swag init
 ```
