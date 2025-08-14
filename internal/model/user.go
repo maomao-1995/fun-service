@@ -5,6 +5,7 @@ import "time"
 // User 对应数据库users表
 type User struct {
 	ID        uint      `gorm:"primaryKey" json:"id"`
+	Uuid	  string    `gorm:"size:36;uniqueIndex" json:"uuid"`
 	Username  string    `gorm:"size:50;uniqueIndex" json:"username"`
 	Birthdate time.Time `json:"birthdate"`
 	Phone     string    `gorm:"size:20;uniqueIndex" json:"phone" binding:"required"`

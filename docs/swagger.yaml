@@ -1,4 +1,19 @@
 definitions:
+  handler.EmojiAddRequest:
+    properties:
+      name:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      url:
+        type: string
+    required:
+    - name
+    - tags
+    - url
+    type: object
   handler.LoginParams:
     properties:
       code:
@@ -53,6 +68,39 @@ info:
   title: Fun Service API
   version: "1.0"
 paths:
+  /emoji/add:
+    post:
+      consumes:
+      - application/json
+      description: 添加表情
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Emoji信息
+        in: body
+        name: emoji
+        required: true
+        schema:
+          $ref: '#/definitions/handler.EmojiAddRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":200,"msg":"添加表情成功","data":Emoji}'
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: '{"code":400,"msg":"xxxx"}'
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 添加表情
+      tags:
+      - emoji
   /login:
     post:
       consumes:

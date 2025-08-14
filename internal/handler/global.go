@@ -9,7 +9,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 
 	"fun-service/pkg/jwtMain"
@@ -92,6 +91,7 @@ func Register(c *gin.Context) {
 		Email:     params.Email,
 		Password:  hashedPasswordString,
 		Nickname:  params.Nickname,
+		Uuid:uuid.New().String(),
 	}
 
 	selectErr01 := database.DB.Where("phone = ?", params.Phone).First(&newUser).Error
@@ -215,15 +215,9 @@ func Login(c *gin.Context) {
 		default:
 		}
 	}
-
-	PhoneTemp, PhoneTempErr := strconv.ParseInt(userTemp.Phone, 10, 64)
-	if PhoneTempErr != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": "手机号转换失败", "error": PhoneTempErr.Error()})
-		return
-	}
-
-	token, _ := jwtMain.GenerateToken(PhoneTemp, userTemp.Username, time.Now().Add(50*time.Minute))
-	c.JSON(http.StatusOK, gin.H{"code": 200, "msg": "登录成功", "data": gin.H{"token": token}})
+	fmt.Println("userTemp", userTemp)
+	token, _ := jwtMain.GenerateToken( userTemp.Uuid, time.Now().Add(50*time.Minute))
+	c.JSON(http.StatusOK, gin.H{"code": 200, "msg": "登录成功", "data": gin.H{"token": token,}})
 }
 
 // @Summary 刷新重置token
@@ -248,8 +242,8 @@ func Refresh(c *gin.Context) {
 		return
 	}
 
-	token01, _ := jwtMain.GenerateToken(claims.UserPhone, claims.Username, time.Now().Add(5*time.Minute))
-	token02, _ := jwtMain.GenerateToken(claims.UserPhone, claims.Username, time.Now().Add(7*24*time.Minute))
+	token01, _ := jwtMain.GenerateToken(claims.Uuid, time.Now().Add(5*time.Minute))
+	token02, _ := jwtMain.GenerateToken(claims.Uuid, time.Now().Add(7*24*time.Minute))
 	c.JSON(http.StatusOK, gin.H{"code": 200, "msg": "刷新重置token成功", "data": gin.H{"accessToken": token01, "refreshToken": token02}})
 }
 

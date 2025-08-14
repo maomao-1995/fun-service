@@ -26,14 +26,12 @@ type UserDTO struct {
 // @Failure 400 {object} map[string]interface{} "{"code":400,"msg":"xxxxx"}"
 // @Router /user/info [get]
 func UserInfo(c *gin.Context) {
-	username := c.MustGet("username").(string)
-	userPhone := c.MustGet("userPhone").(int64)
-
+	uuid := c.MustGet("uuid").(string)
 	var userTemp UserDTO
 	err := database.DB.
 		Model(&model.User{}).
 		Select("id,username, phone,email,nickname").
-		Where("phone = ? OR username = ?", userPhone, username).
+		Where("uuid = ?", uuid).
 		Scan(&userTemp).Error
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": "用户不存在"})

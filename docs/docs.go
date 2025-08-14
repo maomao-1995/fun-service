@@ -15,6 +15,55 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/emoji/add": {
+            "post": {
+                "description": "添加表情",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "emoji"
+                ],
+                "summary": "添加表情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Emoji信息",
+                        "name": "emoji",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.EmojiAddRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\":200,\"msg\":\"添加表情成功\",\"data\":Emoji}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "{\"code\":400,\"msg\":\"xxxx\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/login": {
             "post": {
                 "description": "用户登录",
@@ -263,6 +312,28 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "handler.EmojiAddRequest": {
+            "type": "object",
+            "required": [
+                "name",
+                "tags",
+                "url"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "handler.LoginParams": {
             "type": "object",
             "required": [

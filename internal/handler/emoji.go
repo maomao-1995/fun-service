@@ -21,6 +21,16 @@ type EmojiAddRequest struct {
 	Tags []string `json:"tags" binding:"omitempty,dive,required"`
 }
 
+// @Summary 添加表情
+// @Description 添加表情
+// @Tags emoji
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Authorization"
+// @Param emoji body EmojiAddRequest true "Emoji信息"
+// @Success 200 {object} map[string]interface{} "{"code":200,"msg":"添加表情成功","data":Emoji}"
+// @Failure 400 {object} map[string]interface{} "{"code":400,"msg":"xxxx"}"
+// @Router /emoji/add [post]
 func EmojiAdd(c *gin.Context) {
 	var params EmojiAddRequest
 	if err := c.ShouldBindJSON(&params); err != nil {
@@ -37,6 +47,7 @@ func EmojiAdd(c *gin.Context) {
 		Name: params.Name,
 		URL:  params.URL,
 		Tags: tagsTemp,
+		AuthorUUID: c.GetString("uuid"), // 从上下文中获取用户UUID
 	}
 
 	if err := database.DB.Model(&model.Emoji{}).Create(&newEmoji).Error; err != nil {

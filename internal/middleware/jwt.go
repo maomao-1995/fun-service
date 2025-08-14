@@ -20,8 +20,7 @@ func ParseToken() gin.HandlerFunc {
 			c.AbortWithStatusJSON(401, gin.H{"code": 401, "msg": "非法或过期 token", "error": claimsErr.Error()})
 			return
 		}
-		c.Set("username", claims.Username)
-		c.Set("userPhone", claims.UserPhone)
+		c.Set("uuid", claims.Uuid)
 		c.Next()
 	}
 }
