@@ -14,7 +14,21 @@ definitions:
     - tags
     - url
     type: object
-  handler.LoginParams:
+  handler.EmojiDeleteRequest:
+    properties:
+      id:
+        type: integer
+    required:
+    - id
+    type: object
+  handler.EmojiDetailRequest:
+    properties:
+      id:
+        type: integer
+    required:
+    - id
+    type: object
+  handler.LoginRequest:
     properties:
       code:
         type: string
@@ -32,14 +46,14 @@ definitions:
     required:
     - type
     type: object
-  handler.SendCodeParams:
+  handler.SendCodeRequest:
     properties:
       phone:
         type: string
     required:
     - phone
     type: object
-  handler.UserParams:
+  handler.UserRequest:
     properties:
       birthdate:
         type: string
@@ -101,6 +115,72 @@ paths:
       summary: 添加表情
       tags:
       - emoji
+  /emoji/delete:
+    post:
+      consumes:
+      - application/json
+      description: 删除表情
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Emoji ID
+        in: body
+        name: emoji
+        required: true
+        schema:
+          $ref: '#/definitions/handler.EmojiDeleteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":200,"msg":"删除表情成功"}'
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: '{"code":400,"msg":"xxxx"}'
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 删除表情
+      tags:
+      - emoji
+  /emoji/detail:
+    get:
+      consumes:
+      - application/json
+      description: 获取表情详情
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Emoji ID
+        in: body
+        name: emoji
+        required: true
+        schema:
+          $ref: '#/definitions/handler.EmojiDetailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":200,"msg":"获取表情详情成功","data":EmojiDetailDTO}'
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: '{"code":400,"msg":"xxxx"}'
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 获取表情详情
+      tags:
+      - emoji
   /login:
     post:
       consumes:
@@ -112,7 +192,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/handler.LoginParams'
+          $ref: '#/definitions/handler.LoginRequest'
       produces:
       - application/json
       responses:
@@ -167,7 +247,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/handler.UserParams'
+          $ref: '#/definitions/handler.UserRequest'
       produces:
       - application/json
       responses:
@@ -195,7 +275,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/handler.SendCodeParams'
+          $ref: '#/definitions/handler.SendCodeRequest'
       produces:
       - application/json
       responses:

@@ -23,7 +23,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type UserParams struct {
+type UserRequest struct {
 	Username  string `json:"username" binding:"required"`
 	Birthdate string `json:"birthdate"`
 	Phone     string `json:"phone" binding:"required"`
@@ -38,12 +38,12 @@ type UserParams struct {
 // @Tags global
 // @Accept json
 // @Produce json
-// @Param user body UserParams true "用户信息"
+// @Param user body UserRequest true "用户信息"
 // @Success 200 {object} map[string]interface{} "{"code":200,"msg":"注册成功"}"
 // @Failure 400 {object} map[string]interface{} "{"code":400,"msg":"xxxx"}"
 // @Router /register [post]
 func Register(c *gin.Context) {
-	var params UserParams
+	var params UserRequest
 
 	jsonErr := c.ShouldBindJSON(&params)
 	if jsonErr != nil {
@@ -118,7 +118,7 @@ func Register(c *gin.Context) {
 	})
 }
 
-type SendCodeParams struct {
+type SendCodeRequest struct {
 	Phone string `json:"phone" binding:"required"`
 }
 
@@ -127,12 +127,12 @@ type SendCodeParams struct {
 // @Tags global
 // @Accept json
 // @Produce json
-// @Param user body SendCodeParams true "手机号"
+// @Param user body SendCodeRequest true "手机号"
 // @Success 200 {object} map[string]interface{} "{"code":200,"msg":"验证码发送成功"}"
 // @Failure 400 {object} map[string]interface{} "{"code":400,"msg":"参数错误"}"
 // @Router /sendCode [post]
 func SendCode(c *gin.Context) {
-	var params SendCodeParams
+	var params SendCodeRequest
 
 	jsonErr := c.ShouldBindJSON(&params)
 	if jsonErr != nil {
@@ -162,7 +162,7 @@ func SendCode(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"code": 200, "msg": "验证码发送成功"})
 }
 
-type LoginParams struct {
+type LoginRequest struct {
 	Phone    string `json:"phone" binding:""`
 	Code     string `json:"code" binding:""`
 	Username string `json:"username" binding:""`     // 用户名
@@ -175,12 +175,12 @@ type LoginParams struct {
 // @Tags global
 // @Accept json
 // @Produce json
-// @Param user body LoginParams true "登录信息"
+// @Param user body LoginRequest true "登录信息"
 // @Success 200 {object} map[string]interface{} "{"code":200,"msg":"登录成功"}"
 // @Failure 400 {object} map[string]interface{} "{"code":400,"msg":"xxxxx",token:"xxxx"}"
 // @Router /login [post]
 func Login(c *gin.Context) {
-	var params LoginParams
+	var params LoginRequest
 
 	jsonErr := c.ShouldBindJSON(&params)
 	if jsonErr != nil {

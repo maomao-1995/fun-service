@@ -64,6 +64,104 @@ const docTemplate = `{
                 }
             }
         },
+        "/emoji/delete": {
+            "post": {
+                "description": "删除表情",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "emoji"
+                ],
+                "summary": "删除表情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Emoji ID",
+                        "name": "emoji",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.EmojiDeleteRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\":200,\"msg\":\"删除表情成功\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "{\"code\":400,\"msg\":\"xxxx\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/emoji/detail": {
+            "get": {
+                "description": "获取表情详情",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "emoji"
+                ],
+                "summary": "获取表情详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Emoji ID",
+                        "name": "emoji",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.EmojiDetailRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\":200,\"msg\":\"获取表情详情成功\",\"data\":EmojiDetailDTO}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "{\"code\":400,\"msg\":\"xxxx\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/login": {
             "post": {
                 "description": "用户登录",
@@ -84,7 +182,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.LoginParams"
+                            "$ref": "#/definitions/handler.LoginRequest"
                         }
                     }
                 ],
@@ -166,7 +264,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.UserParams"
+                            "$ref": "#/definitions/handler.UserRequest"
                         }
                     }
                 ],
@@ -208,7 +306,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.SendCodeParams"
+                            "$ref": "#/definitions/handler.SendCodeRequest"
                         }
                     }
                 ],
@@ -334,7 +432,29 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.LoginParams": {
+        "handler.EmojiDeleteRequest": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handler.EmojiDetailRequest": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handler.LoginRequest": {
             "type": "object",
             "required": [
                 "type"
@@ -360,7 +480,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.SendCodeParams": {
+        "handler.SendCodeRequest": {
             "type": "object",
             "required": [
                 "phone"
@@ -371,7 +491,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.UserParams": {
+        "handler.UserRequest": {
             "type": "object",
             "required": [
                 "code",
